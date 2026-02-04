@@ -296,75 +296,199 @@ $(document).ready(function () {
 
 
 <blockquote>
-<p>The projects should be numbered consecutively (i.e., in the order in
-which you began them), and should include for each project a description
-of the goal, the product (computer program, hand graph, computer graph,
-etc.), the data, and some interpretation. Reports must be reproducible
-and of high quality in terms of writing, grammar, presentation, etc.</p>
+<p>Fall 2025, I collected some data on earthworms crop-gizzard smooth
+muscle contractions and how extracellular dopamine at different
+concentrations affect the frequency and amplitude of the contractions. I
+made the graphs with SPSS initially, but they were called ugly by my
+instructor, which I agree. I ended up making the graphs in excel, but
+now I want to remake them in R.</p>
 </blockquote>
 <pre class="r"><code>library(tidyverse) 
 library(tidyr)
-data(fish_encounters)</code></pre>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum
-eget nibh vel est aliquet iaculis at placerat sem. Aenean faucibus
-iaculis ultricies. Nullam consequat odio in ultricies ullamcorper. Etiam
-venenatis in est vitae ullamcorper. Nam vitae urna ut dolor rhoncus
-aliquet at vel neque. Quisque tristique leo finibus nisi interdum, sit
-amet tempor risus viverra. Donec mollis vulputate sodales. Nunc ornare,
-leo quis euismod eleifend, eros mi maximus felis, vel varius lacus dui
-eget nibh. Duis vitae nunc nisl. Donec accumsan aliquam elit, eu
-fringilla quam pulvinar eget.</p>
-<p>Mauris in ligula mauris. Curabitur facilisis pharetra metus eget
-lobortis. In egestas nibh sit amet faucibus eleifend. Suspendisse
-imperdiet viverra blandit. Phasellus consectetur tincidunt eros eu
-facilisis. Quisque maximus, orci eget sodales aliquam, velit lorem
-semper dolor, nec convallis erat ipsum mattis velit. Pellentesque
-porttitor, mauris vitae aliquam mattis, metus nisl viverra turpis, vel
-convallis metus sapien et ex. Nunc consequat ipsum id dolor eleifend,
-sit amet semper eros sodales. Pellentesque consectetur, dui quis
-venenatis malesuada, nunc lorem lacinia libero, vitae malesuada dui arcu
-in augue. Aliquam id sagittis libero. Vestibulum aliquet sagittis
-libero, non posuere odio molestie ut. Curabitur lacus enim, viverra vel
-odio non, pretium efficitur elit. Mauris posuere efficitur interdum.
-Nunc sed bibendum turpis, quis fringilla velit. Phasellus eu lorem
-lobortis eros molestie laoreet.</p>
-<pre class="r"><code># Create a barplot of the number of fish encounters by species
-ggplot(data = fish_encounters, aes(x = station, y = seen)) +
-  geom_bar(stat = &quot;identity&quot;) +
-  labs(x = &quot;Species&quot;, y = &quot;Number of Fish Encounters&quot;)</code></pre>
-<p><img src="p01_files/figure-html/unnamed-chunk-1-1.png" alt="" width="672" /></p>
-<p>Sed mollis purus faucibus leo finibus, ut pharetra nibh elementum.
-Nulla id orci lorem. Mauris sollicitudin mi eget tellus vehicula, ut
-convallis lorem mollis. In blandit nulla diam, a malesuada sem volutpat
-interdum. Ut elementum elit at velit maximus, ac tempor odio porttitor.
-Suspendisse lobortis sollicitudin tortor, ut pharetra libero luctus a.
-Sed hendrerit faucibus metus. Sed rutrum purus vel pellentesque
-euismod.</p>
-<pre class="r"><code># Create a barplot of the number of fish encounters by species
-ggplot(data = fish_encounters, aes(x = station, y = seen)) +
-  geom_bar(stat = &quot;identity&quot;) +
-  labs(x = &quot;Species&quot;, y = &quot;Number of Fish Encounters&quot;)</code></pre>
+library(readxl)
+setwd(&quot;D:/Yiwei/WFU/Senior/Spring 2026/PSY 279 B/Portfolio_ds4p/&quot;)
+the.data &lt;- read_excel(&quot;Crop-Gizzard.xlsx&quot;)</code></pre>
+<p>Here, I first tried to plot a bar graph with three bars representing
+the average contraction frequency of the crop-gizzard under three
+different dopamine concentrations: vehicle, 20nM, and 40nM.</p>
+<pre class="r"><code>vehicle_freq_mean &lt;- mean(the.data$frequency[the.data$dose == 1])
+vehicle_freq_sd &lt;- sd(the.data$frequency[the.data$dose == 1])
+
+low_freq_mean &lt;- mean(the.data$frequency[the.data$dose == 2])
+low_freq_sd &lt;- sd(the.data$frequency[the.data$dose == 2])
+
+high_freq_mean &lt;- mean(the.data$frequency[the.data$dose == 3])
+high_freq_sd &lt;- sd(the.data$frequency[the.data$dose == 3])
+
+the.data &lt;- the.data %&gt;% 
+  mutate(
+    dose = case_when(
+      dose == 1 ~ &quot;vehicle&quot;,
+      dose == 2 ~ &quot;20nM&quot;,
+      dose == 3 ~ &quot;40nM&quot;
+    )
+  )
+
+#the.data %&gt;% 
+#  ggplot() +
+#  geom_bar(aes(x = dose,
+#               y = c(vehicle_freq_mean, low_freq_mean, high_freq_mean),
+#               stat = &quot;identity&quot;
+#               )
+#  ) +
+#  geom_errorbar((aes(x = dose,
+#                     y = c(vehicle_freq_sd, low_freq_sd, high_freq_sd)
+#                     )
+#                 )
+#  ) +
+#  geom_point(aes(x = dose,
+#                 y = frequency
+#                 )
+#  )</code></pre>
+<p>geom_bar() did not like the way I put in the aesthetics. I got an
+error message saying that “Aesthetics must be either length 1 or the
+same as the data (21).” and I need to fix the mapping of “y”. Next, I
+will attempt a different way of arragning my data to fix the mapping
+problem.</p>
+<pre class="r"><code>rm(list = ls())
+the.data &lt;- read_excel(&quot;Crop-Gizzard.xlsx&quot;)
+
+the.data &lt;- the.data %&gt;% 
+  mutate(
+    dose = case_when(
+      dose == 1 ~ &quot;vehicle&quot;,
+      dose == 2 ~ &quot;20nM&quot;,
+      dose == 3 ~ &quot;40nM&quot;
+    )
+  )
+
+veh.data &lt;- the.data %&gt;% 
+  filter(dose == &quot;vehicle&quot;)
+
+low.data &lt;- the.data %&gt;% 
+  filter(dose == &quot;20nM&quot;)
+
+high.data &lt;- the.data %&gt;% 
+  filter(dose == &quot;40nM&quot;)
+
+new.freq.data &lt;- data.frame(
+  veh_freq = veh.data$frequency,
+  low_freq = low.data$frequency,
+  high_freq = high.data$frequency
+)
+
+mean_freq &lt;- colMeans(new.freq.data)
+
+#new.freq.data %&gt;% 
+#  ggplot()+
+#  geom_bar(x = names(new.freq.data),
+#           y = colMeans(new.freq.data, na.rm = TRUE)
+#    )</code></pre>
+<p>At this point I have spent literal HOURS trying to get the bar plot
+to work, but the mappings are flagging errors all the time. Next, I want
+to see if turning the doses into factors and grouping the data might
+help with the problem.</p>
+<pre class="r"><code>rm(list = ls())
+the.data &lt;- read_excel(&quot;Crop-Gizzard.xlsx&quot;)
+
+the.data &lt;- the.data %&gt;%
+  mutate(
+    dose = factor(
+      dose,
+      levels = c(1, 2, 3),
+      labels = c(&quot;Vehicle&quot;, &quot;20nM&quot;, &quot;40nM&quot;)
+    )
+  )
+
+summary_data &lt;- the.data %&gt;%
+  group_by(dose) %&gt;%
+  summarise(
+    mean_freq = mean(frequency, na.rm = TRUE),
+    sem_freq  = sd(frequency, na.rm = TRUE) / sqrt(n()),
+    .groups = &quot;drop&quot;
+  )
+
+ggplot() +
+  geom_col(data = summary_data,
+           aes(x = dose,
+                 y = mean_freq, 
+                 fill = dose
+                 ),
+            width = 0.6,
+            alpha = 0.9
+          ) +
+  geom_errorbar(data = summary_data,
+                aes(
+                  x = dose,
+                  ymin = mean_freq - sem_freq, 
+                  ymax = mean_freq + sem_freq
+                  ), 
+                width = 0.15, 
+                linewidth = 0.8
+                ) +
+  geom_point(data = the.data,
+             aes(x = dose, 
+                 y = frequency),
+             size = 2.5
+            ) +
+  labs(title = &quot;Crop-gizzard contraction frequency&quot;,
+       x = &quot;Dopamine Doses&quot;,
+       y = &quot;Frequency&quot;,
+       fill = &quot;Dose&quot;
+    ) +
+  theme_minimal() +
+  scale_fill_viridis_d()</code></pre>
 <p><img src="p01_files/figure-html/unnamed-chunk-2-1.png" alt="" width="672" /></p>
-<p>Mauris placerat in velit a pharetra. Nulla viverra bibendum lectus,
-ut lobortis nibh. Aenean malesuada, orci vitae dictum placerat, enim
-justo aliquet leo, ac tincidunt augue ipsum et mi. Nullam in pharetra
-metus, nec molestie felis. Duis varius rhoncus pulvinar. Integer semper
-urna sed tellus rhoncus, vel suscipit odio iaculis. Mauris iaculis neque
-pellentesque ex convallis venenatis. Sed ultrices euismod fermentum. Ut
-feugiat risus at turpis tincidunt viverra.</p>
-<pre class="r"><code># Create a barplot of the number of fish encounters by species
-ggplot(data = fish_encounters, aes(x = station, y = seen)) +
-  geom_bar(stat = &quot;identity&quot;) +
-  labs(x = &quot;Species&quot;, y = &quot;Number of Fish Encounters&quot;)</code></pre>
+<p>Finally, it worked! I have successfully re-created the frequency
+graph that I once made with Excel within in 30 minutes now with R in a
+couple of hours. I tried a couple of ways to remove the legend, but
+failed miserably. I don’t think that’s worth digging deeper at this
+moment, so let’s move on! I’m really starting to miss Excel and even
+MATLAB. Now, with the codes I have on frequency, I’ll graph the
+amplitude.</p>
+<pre class="r"><code>summary_data2 &lt;- the.data %&gt;%
+  group_by(dose) %&gt;%
+  summarise(
+    mean_amp = mean(amplitude, na.rm = TRUE),
+    sem_amp  = sd(amplitude, na.rm = TRUE) / sqrt(n()),
+    .groups = &quot;drop&quot;
+  )
+
+ggplot() +
+  geom_col(data = summary_data2,
+           aes(x = dose,
+                 y = mean_amp, 
+                 fill = dose
+                 ),
+            width = 0.6,
+            alpha = 0.9
+          ) +
+  geom_errorbar(data = summary_data2,
+                aes(
+                  x = dose,
+                  ymin = mean_amp - sem_amp, 
+                  ymax = mean_amp + sem_amp
+                  ), 
+                width = 0.15, 
+                linewidth = 0.8
+                ) +
+  geom_point(data = the.data,
+             aes(x = dose, 
+                 y = amplitude),
+             size = 2.5
+            ) +
+  labs(title = &quot;Crop-gizzard contraction amplitude&quot;,
+       x = &quot;Dopamine Doses&quot;,
+       y = &quot;Amplitude&quot;,
+       fill = &quot;Dose&quot;
+    ) +
+  theme_minimal() +
+  scale_fill_viridis_d()</code></pre>
 <p><img src="p01_files/figure-html/unnamed-chunk-3-1.png" alt="" width="672" /></p>
-<p>Donec sagittis suscipit orci in ultrices. Vivamus iaculis eleifend
-est et dictum. Fusce non urna at lacus dapibus tincidunt ac sed nibh.
-Donec luctus lectus elit, ac ultrices tortor mollis sit amet. Nulla
-finibus lacinia arcu. Proin sollicitudin non odio et pulvinar. Maecenas
-finibus faucibus finibus. Ut elementum metus velit, a sodales sapien
-commodo et. Vivamus pulvinar, sapien et porta cursus, elit est luctus
-nisi, eget fringilla odio diam et enim. Sed sodales suscipit bibendum.
-Morbi ut metus semper, laoreet felis sodales, consequat dolor.</p>
+<p>The success of recreating both the frequency and amplitude graphs
+marks the end of this portfolio piece. This struggle deepened my
+understanding of how ggplot works and the importance of type and
+arrangement of data on subsequent analysis and graphing.</p>
 
 
 

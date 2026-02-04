@@ -131,13 +131,59 @@ ggplot() +
                 ) +
   geom_point(data = the.data,
              aes(x = dose, 
-                 y = frequency), 
-             width = 0.08, 
-             size = 2.5,
-             color = "dose"
+                 y = frequency),
+             size = 2.5
             ) +
-  labs(x = "Dopamine Doses",
-       y = "Frequency"
-    )
+  labs(title = "Crop-gizzard contraction frequency",
+       x = "Dopamine Doses",
+       y = "Frequency",
+       fill = "Dose"
+    ) +
+  theme_minimal() +
+  scale_fill_viridis_d()
 ```
 
+Finally, it worked! I have successfully re-created the frequency graph that I once made with Excel within in 30 minutes now with R in a couple of hours. I tried a couple of ways to remove the legend, but failed miserably. I don't think that's worth digging deeper at this moment, so let's move on! I'm really starting to miss Excel and even MATLAB. Now, with the codes I have on frequency, I'll graph the amplitude.
+
+```{r}
+summary_data2 <- the.data %>%
+  group_by(dose) %>%
+  summarise(
+    mean_amp = mean(amplitude, na.rm = TRUE),
+    sem_amp  = sd(amplitude, na.rm = TRUE) / sqrt(n()),
+    .groups = "drop"
+  )
+
+ggplot() +
+  geom_col(data = summary_data2,
+           aes(x = dose,
+                 y = mean_amp, 
+                 fill = dose
+                 ),
+            width = 0.6,
+            alpha = 0.9
+          ) +
+  geom_errorbar(data = summary_data2,
+                aes(
+                  x = dose,
+                  ymin = mean_amp - sem_amp, 
+                  ymax = mean_amp + sem_amp
+                  ), 
+                width = 0.15, 
+                linewidth = 0.8
+                ) +
+  geom_point(data = the.data,
+             aes(x = dose, 
+                 y = amplitude),
+             size = 2.5
+            ) +
+  labs(title = "Crop-gizzard contraction amplitude",
+       x = "Dopamine Doses",
+       y = "Amplitude",
+       fill = "Dose"
+    ) +
+  theme_minimal() +
+  scale_fill_viridis_d()
+```
+
+The success of recreating both the frequency and amplitude graphs marks the end of this portfolio piece. This struggle deepened my understanding of how ggplot works and the importance of type and arrangement of data on subsequent analysis and graphing.
