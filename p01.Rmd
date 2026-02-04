@@ -81,42 +81,63 @@ new.freq.data <- data.frame(
 
 mean_freq <- colMeans(new.freq.data)
 
-new.freq.data %>% 
-  ggplot(aes(x = mean_freq[1, ],
-      y = mean_freq[2, ]
-      )
-  )+
-  geom_bar(stat = "identity"
-    )
-  
-new.data %>% 
-  ggplot(aes(x = ,
-             y = c(vehicle_freq_mean, low_freq_mean, high_freq_mean),
-             fill = dose
-  )) +
-  geom_bar(stat = "summary"
-  ) +
-  geom_errorbar((aes(x = dose,
-                     y = c(vehicle_freq_sd, low_freq_sd, high_freq_sd)
-                     )
-                 )
-  ) +
-  geom_point(aes(x = dose,
-                 y = frequency
-                 )
-  )
+#new.freq.data %>% 
+#  ggplot()+
+#  geom_bar(x = names(new.freq.data),
+#           y = colMeans(new.freq.data, na.rm = TRUE)
+#    )
 ```
 
-ggplot() + 
-  geom_bar(aes(x= x_row, y = y_val), df, stat = 'identity') +
-  geom_errorbar(aes(x = x_row, ymin=mean-sd, ymax=mean+sd), df, width=.2) +
-  geom_point(aes(x = name, y = value, color = name), Book1, size = 5)
+At this point I have spent literal HOURS trying to get the bar plot to work, but the mappings are flagging errors all the time. Next, I want to see if turning the doses into factors and grouping the data might help with the problem.
 
-the.data %>% 
-  ggplot(mapping = aes(x = dose,
-                       y = frequency,
-                       fill = dose)
-         ) +
-  geom_point() +
-  ggplot()
+```{r}
+rm(list = ls())
+the.data <- read_excel("Crop-Gizzard.xlsx")
+
+the.data <- the.data %>%
+  mutate(
+    dose = factor(
+      dose,
+      levels = c(1, 2, 3),
+      labels = c("Vehicle", "20nM", "40nM")
+    )
+  )
+
+summary_data <- the.data %>%
+  group_by(dose) %>%
+  summarise(
+    mean_freq = mean(frequency, na.rm = TRUE),
+    sem_freq  = sd(frequency, na.rm = TRUE) / sqrt(n()),
+    .groups = "drop"
+  )
+
+ggplot() +
+  geom_col(data = summary_data,
+           aes(x = dose,
+                 y = mean_freq, 
+                 fill = dose
+                 ),
+            width = 0.6,
+            alpha = 0.9
+          ) +
+  geom_errorbar(data = summary_data,
+                aes(
+                  x = dose,
+                  ymin = mean_freq - sem_freq, 
+                  ymax = mean_freq + sem_freq
+                  ), 
+                width = 0.15, 
+                linewidth = 0.8
+                ) +
+  geom_point(data = the.data,
+             aes(x = dose, 
+                 y = frequency), 
+             width = 0.08, 
+             size = 2.5,
+             color = "dose"
+            ) +
+  labs(x = "Dopamine Doses",
+       y = "Frequency"
+    )
+```
 
