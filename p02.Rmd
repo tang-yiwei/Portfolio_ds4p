@@ -2,4 +2,54 @@
 title: "Portfolio 2"
 ---
 
-> The projects should be numbered consecutively (i.e., in the order in which you began them), and should include for each project a description of the goal, the product (computer program, hand graph, computer graph, etc.), the data, and some interpretation. Reports must be reproducible and of high quality in terms of writing, grammar, presentation, etc.
+> When we run animals in the operant chambers in Dr. Pratt's lab, we record all the timestamps for the events in a single array, with digits after the decimal point indicating the nature of the event. In the past, when we analyze the data, we need to manually extract the datapoints with different event codes and put them in seperate data arrays. Here, I try to automize this process, so Dr. Pratt doesn't have to do it manually in the future.
+
+>First, I'll read in the data. The original data was a text file with everything we've ran that day. I extracted the data for one animal and transferred it into a spreadsheet.
+```{r load-packages}
+library(tidyverse) 
+library(tidyr)
+library(readxl)
+file_path <- "2025-10-14_IN1_DRL20_D10.xlsx"
+raw_data <- read_excel(file_path, col_names = FALSE)
+print(raw_data)
+```
+
+>Next, I will convert the entire sheet to a continuous numeric vector. I want the data to flatten row-by-row, not solumn-wise, so I need to transpose the data first.
+```{r convert}
+data_matrix <- as.matrix(raw_data)
+data_vector <- as.numeric(c(t(data_matrix)))
+print(data_vector)
+```
+
+>Next step is to remove the first 11 values, since they are not the actual timestamps, but the summary of the total lever presses and nose pokes etc.
+```{r remove_summary}
+data_vector <- data_vector[-(1:11)]
+print(data_vector)
+```
+
+>Now I'll extract timestamp and event code from the data.
+```{r extract}
+timestamps <- floor(data_vector)
+event_codes <- round((data_vector - timestamps) * 10)
+print(timestamps)
+print(event_codes)
+```
+
+>Next, I'll sort the timestamps into separate arrays according to the event codes.
+```{r sort}
+right_lever <- timestamps[event_codes == 1]
+left_lever <- timestamps[event_codes == 2]
+nosepokes <- timestamps[event_codes == 3]
+free_pellet <- timestamps[event_codes == 4]
+earned_pellet <- timestamps[event_codes == 5]
+
+sapply(list(
+  right = right_lever,
+  left = left_lever,
+  nose = nosepokes,
+  free = free_pellet,
+  earned = earned_pellet
+), length)
+```
+
+>Now we have it! With this script, I can easily sort the timestamp of different events into separate arrays without any hassle.
