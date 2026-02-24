@@ -2,15 +2,131 @@
 title: "Portfolio 3"
 ---
 
-> The projects should be numbered consecutively (i.e., in the order in which you began them), and should include for each project a description of the goal, the product (computer program, hand graph, computer graph, etc.), the data, and some interpretation. Reports must be reproducible and of high quality in terms of writing, grammar, presentation, etc.
+> I am working with Dr. Sali on a project looking at emotions and attentional flexibility. In the test phase I assess participants' readiness to shift their attention with a rapid serial visual presentation (RSVP) task. In the task, the shift/hold cue appears at either the short or the long interval, and those intervals were previously associated with either threatening or neutral images. There are two versions of the previous task, version 1 mostly have the threat at the short interval, while version 2 have the threat at the long interval.
+
+> I did the initial analysis in SPSS, with really ugly graphs. Now I want to recreate the graphs in r. I have a 2x2x2 design. I will have the time interval (short/long) on the x axis, the RT on the y axis, shift/hold as two separate lines, and versions as separate panels.
+
+> First, load the packages and data.
 
 ```{r load-data}
 library(haven)
 library(tidyverse)
 
 the.data <- read_sav("TestPhase_18-68.sav")
-
-the.data <- the.data %>%
-  mutate(across(where(is.labelled), as_factor))
 ```
 
+> I don't think I can plot directly from the format of the data I have now. So, I'll convert the data from "wide" to "long" and extract the conditions.
+
+```{r convert}
+data_long_RT <- the.data %>%
+  pivot_longer(
+    cols = c(Short_HoldRT, Short_ShiftRT,
+             Long_HoldRT,  Long_ShiftRT),
+    names_to = "condition",
+    values_to = "RT"
+  )
+
+data_long_RT <- data_long_RT %>%
+  separate(condition, into = c("short_long", "shift_hold"),
+           sep = "_") %>%
+  mutate(
+    short_long = factor(short_long, levels = c("Short", "Long")),
+    shift_hold = factor(shift_hold, levels = c("HoldRT", "ShiftRT"))
+  )
+
+data_long_RT <- data_long_RT %>%
+  mutate(
+    shift_hold = recode(shift_hold,
+                        "HoldRT" = "Hold",
+                        "ShiftRT" = "Shift")
+  )
+
+data_long_RT <- data_long_RT %>% 
+  drop_na(RT)
+```
+
+> Now I can start graphing.
+
+```{r RT graph}
+data_long_RT %>% 
+  ggplot(
+    aes(
+      x = short_long,
+      y = RT,
+      group = shift_hold,
+      linetype = shift_hold,
+      color = shift_hold
+    )
+  ) + 
+   stat_summary(fun = mean, geom = "point") +
+   stat_summary(fun = mean, geom = "line", size = 0.8) +
+  facet_wrap(~version,
+             labeller = labeller(
+               version = c("1" = "Version 1",
+                           "2" = "Version 2")
+             )) +
+  labs(
+    x = "Interval",
+    y = "Reaction Time",
+    linetype = "Condition",
+    color = "Condition"
+  ) +
+  theme_classic()
+```
+
+> Here we have it! Next, I'll do the same things with accuracy.
+
+```{r accuracy}
+data_long_acc <- the.data %>%
+  pivot_longer(
+    cols = c(Short_HoldAcc, Short_ShiftAcc,
+             Long_HoldAcc,  Long_ShiftAcc),
+    names_to = "condition",
+    values_to = "Acc"
+  )
+
+data_long_acc <- data_long_acc %>%
+  separate(condition, into = c("short_long", "shift_hold"),
+           sep = "_") %>%
+  mutate(
+    short_long = factor(short_long, levels = c("Short", "Long")),
+    shift_hold = factor(shift_hold, levels = c("HoldAcc", "ShiftAcc"))
+  )
+
+data_long_acc <- data_long_acc %>%
+  mutate(
+    shift_hold = recode(shift_hold,
+                        "HoldRT" = "Hold",
+                        "ShiftRT" = "Shift")
+  )
+
+data_long_acc <- data_long_acc %>% 
+  drop_na(Acc)
+
+data_long_acc %>% 
+  ggplot(
+    aes(
+      x = short_long,
+      y = Acc,
+      group = shift_hold,
+      linetype = shift_hold,
+      color = shift_hold
+    )
+  ) + 
+   stat_summary(fun = mean, geom = "point") +
+   stat_summary(fun = mean, geom = "line", size = 0.8) +
+  facet_wrap(~version,
+             labeller = labeller(
+               version = c("1" = "Version 1",
+                           "2" = "Version 2")
+             )) +
+  labs(
+    x = "Interval",
+    y = "Accuracy",
+    linetype = "Condition",
+    color = "Condition"
+  ) +
+  theme_classic()
+```
+
+> Now we have both graphs!

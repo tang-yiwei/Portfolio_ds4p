@@ -296,11 +296,24 @@ $(document).ready(function () {
 
 
 <blockquote>
-<p>The projects should be numbered consecutively (i.e., in the order in
-which you began them), and should include for each project a description
-of the goal, the product (computer program, hand graph, computer graph,
-etc.), the data, and some interpretation. Reports must be reproducible
-and of high quality in terms of writing, grammar, presentation, etc.</p>
+<p>I am working with Dr. Sali on a project looking at emotions and
+attentional flexibility. In the test phase I assess participants’
+readiness to shift their attention with a rapid serial visual
+presentation (RSVP) task. In the task, the shift/hold cue appears at
+either the short or the long interval, and those intervals were
+previously associated with either threatening or neutral images. There
+are two versions of the previous task, version 1 mostly have the threat
+at the short interval, while version 2 have the threat at the long
+interval.</p>
+</blockquote>
+<blockquote>
+<p>I did the initial analysis in SPSS, with really ugly graphs. Now I
+want to recreate the graphs in r. I have a 2x2x2 design. I will have the
+time interval (short/long) on the x axis, the RT on the y axis,
+shift/hold as two separate lines, and versions as separate panels.</p>
+</blockquote>
+<blockquote>
+<p>First, load the packages and data.</p>
 </blockquote>
 <pre class="r"><code>library(haven)
 library(tidyverse)</code></pre>
@@ -314,10 +327,127 @@ library(tidyverse)</code></pre>
 ## ✖ dplyr::filter() masks stats::filter()
 ## ✖ dplyr::lag()    masks stats::lag()
 ## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-<pre class="r"><code>the.data &lt;- read_sav(&quot;TestPhase_18-68.sav&quot;)
+<pre class="r"><code>the.data &lt;- read_sav(&quot;TestPhase_18-68.sav&quot;)</code></pre>
+<blockquote>
+<p>I don’t think I can plot directly from the format of the data I have
+now. So, I’ll convert the data from “wide” to “long” and extract the
+conditions.</p>
+</blockquote>
+<pre class="r"><code>data_long_RT &lt;- the.data %&gt;%
+  pivot_longer(
+    cols = c(Short_HoldRT, Short_ShiftRT,
+             Long_HoldRT,  Long_ShiftRT),
+    names_to = &quot;condition&quot;,
+    values_to = &quot;RT&quot;
+  )
 
-the.data &lt;- the.data %&gt;%
-  mutate(across(where(is.labelled), as_factor))</code></pre>
+data_long_RT &lt;- data_long_RT %&gt;%
+  separate(condition, into = c(&quot;short_long&quot;, &quot;shift_hold&quot;),
+           sep = &quot;_&quot;) %&gt;%
+  mutate(
+    short_long = factor(short_long, levels = c(&quot;Short&quot;, &quot;Long&quot;)),
+    shift_hold = factor(shift_hold, levels = c(&quot;HoldRT&quot;, &quot;ShiftRT&quot;))
+  )
+
+data_long_RT &lt;- data_long_RT %&gt;%
+  mutate(
+    shift_hold = recode(shift_hold,
+                        &quot;HoldRT&quot; = &quot;Hold&quot;,
+                        &quot;ShiftRT&quot; = &quot;Shift&quot;)
+  )
+
+data_long_RT &lt;- data_long_RT %&gt;% 
+  drop_na(RT)</code></pre>
+<blockquote>
+<p>Now I can start graphing.</p>
+</blockquote>
+<pre class="r"><code>data_long_RT %&gt;% 
+  ggplot(
+    aes(
+      x = short_long,
+      y = RT,
+      group = shift_hold,
+      linetype = shift_hold,
+      color = shift_hold
+    )
+  ) + 
+   stat_summary(fun = mean, geom = &quot;point&quot;) +
+   stat_summary(fun = mean, geom = &quot;line&quot;, size = 0.8) +
+  facet_wrap(~version,
+             labeller = labeller(
+               version = c(&quot;1&quot; = &quot;Version 1&quot;,
+                           &quot;2&quot; = &quot;Version 2&quot;)
+             )) +
+  labs(
+    x = &quot;Interval&quot;,
+    y = &quot;Reaction Time&quot;,
+    linetype = &quot;Condition&quot;,
+    color = &quot;Condition&quot;
+  ) +
+  theme_classic()</code></pre>
+<pre><code>## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+## ℹ Please use `linewidth` instead.
+## This warning is displayed once per session.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.</code></pre>
+<p><img src="p03_files/figure-html/RT%20graph-1.png" alt="" width="672" /></p>
+<blockquote>
+<p>Here we have it! Next, I’ll do the same things with accuracy.</p>
+</blockquote>
+<pre class="r"><code>data_long_acc &lt;- the.data %&gt;%
+  pivot_longer(
+    cols = c(Short_HoldAcc, Short_ShiftAcc,
+             Long_HoldAcc,  Long_ShiftAcc),
+    names_to = &quot;condition&quot;,
+    values_to = &quot;Acc&quot;
+  )
+
+data_long_acc &lt;- data_long_acc %&gt;%
+  separate(condition, into = c(&quot;short_long&quot;, &quot;shift_hold&quot;),
+           sep = &quot;_&quot;) %&gt;%
+  mutate(
+    short_long = factor(short_long, levels = c(&quot;Short&quot;, &quot;Long&quot;)),
+    shift_hold = factor(shift_hold, levels = c(&quot;HoldAcc&quot;, &quot;ShiftAcc&quot;))
+  )
+
+data_long_acc &lt;- data_long_acc %&gt;%
+  mutate(
+    shift_hold = recode(shift_hold,
+                        &quot;HoldRT&quot; = &quot;Hold&quot;,
+                        &quot;ShiftRT&quot; = &quot;Shift&quot;)
+  )
+
+data_long_acc &lt;- data_long_acc %&gt;% 
+  drop_na(Acc)
+
+data_long_acc %&gt;% 
+  ggplot(
+    aes(
+      x = short_long,
+      y = Acc,
+      group = shift_hold,
+      linetype = shift_hold,
+      color = shift_hold
+    )
+  ) + 
+   stat_summary(fun = mean, geom = &quot;point&quot;) +
+   stat_summary(fun = mean, geom = &quot;line&quot;, size = 0.8) +
+  facet_wrap(~version,
+             labeller = labeller(
+               version = c(&quot;1&quot; = &quot;Version 1&quot;,
+                           &quot;2&quot; = &quot;Version 2&quot;)
+             )) +
+  labs(
+    x = &quot;Interval&quot;,
+    y = &quot;Accuracy&quot;,
+    linetype = &quot;Condition&quot;,
+    color = &quot;Condition&quot;
+  ) +
+  theme_classic()</code></pre>
+<p><img src="p03_files/figure-html/accuracy-1.png" alt="" width="672" /></p>
+<blockquote>
+<p>Now we have both graphs!</p>
+</blockquote>
 
 
 
