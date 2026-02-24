@@ -3,3 +3,14 @@ title: "Portfolio 3"
 ---
 
 > The projects should be numbered consecutively (i.e., in the order in which you began them), and should include for each project a description of the goal, the product (computer program, hand graph, computer graph, etc.), the data, and some interpretation. Reports must be reproducible and of high quality in terms of writing, grammar, presentation, etc.
+
+```{r load-data}
+library(haven)
+library(tidyverse)
+
+the.data <- read_sav("TestPhase_18-68.sav")
+
+the.data <- the.data %>%
+  mutate(across(where(is.labelled), as_factor))
+```
+
