@@ -2,4 +2,178 @@
 title: "Portfolio 6"
 ---
 
-> The projects should be numbered consecutively (i.e., in the order in which you began them), and should include for each project a description of the goal, the product (computer program, hand graph, computer graph, etc.), the data, and some interpretation. Reports must be reproducible and of high quality in terms of writing, grammar, presentation, etc.
+> This is the last portion of the Add Health analysis. In this piece, I will test a third hypothesis:
+
+> It is hypothesized that neighborhood environment (Neighborhood, T1) will predict lower levels of adolescent depressive symptoms (Feeling Scale, T2; total effect). However, this effect will be attenuated after support from family and friends (Protective Factors, T1) is controlled for (partial effect).
+
+> First, load the package and data.
+
+```{r load_package&data}
+library(haven)
+
+wave1 <- read_spss("wave1.sav")
+wave2 <- read_spss("wave2.sav")
+```
+
+> Next, recode the variables.
+
+```{r recode}
+### Neighborhood, T1
+  # recode H1NB6
+  wave1$H1NB6[wave1$H1NB6 >5] <- NA
+  
+  # recode H1NB7
+  wave1$NB[wave1$H1NB7 == 1] <- 5
+  wave1$NB[wave1$H1NB7 == 2] <- 4
+  wave1$NB[wave1$H1NB7 == 4] <- 2
+  wave1$NB[wave1$H1NB7 == 5] <- 1
+  
+  wave1$Neighbor <- apply(wave1[,c("H1NB6", 
+                                   "NB")], 1, sum)
+
+### Feeling Scale, T2
+  # recode H2FS1
+  wave2$H2FS1[wave2$H2FS1 > 3] <- NA
+  
+  # recode H2FS2
+  wave2$H2FS2[wave2$H2FS2 > 3] <- NA
+  
+  # recode H2FS3
+  wave2$H2FS3[wave2$H2FS3 > 3] <- NA
+  
+  # recode H2FS4
+  wave2$FS4[wave2$H2FS4 == 0] <- 3
+  wave2$FS4[wave2$H2FS4 == 1] <- 2
+  wave2$FS4[wave2$H2FS4 == 2] <- 1
+  wave2$FS4[wave2$H2FS4 == 3] <- 0
+  
+  # recode H2FS5
+  wave2$H2FS5[wave2$H2FS5 > 3] <- NA
+  
+  # recode H2FS6
+  wave2$H2FS6[wave2$H2FS6 > 3] <- NA
+  
+  # recode H2FS7
+  wave2$H2FS7[wave2$H2FS7 > 3] <- NA
+  
+  # recode H2FS8
+  wave2$FS8[wave2$H2FS8 == 0] <- 3
+  wave2$FS8[wave2$H2FS8 == 1] <- 2
+  wave2$FS8[wave2$H2FS8 == 2] <- 1
+  wave2$FS8[wave2$H2FS8 == 3] <- 0
+  
+  # recode H2FS9
+  wave2$H2FS9[wave2$H2FS9 > 3] <- NA
+  
+  # recode H2FS10
+  wave2$H2FS10[wave2$H2FS10 > 3] <- NA
+  
+  # recode H2FS11
+  wave2$FS11[wave2$H2FS11 == 0] <- 3
+  wave2$FS11[wave2$H2FS11 == 1] <- 2
+  wave2$FS11[wave2$H2FS11 == 2] <- 1
+  wave2$FS11[wave2$H2FS11 == 3] <- 0
+  
+  # recode H2FS12
+  wave2$H2FS12[wave2$H2FS12 > 3] <- NA
+  
+  # recode H2FS13
+  wave2$H2FS13[wave2$H2FS13 > 3] <- NA
+  
+  # recode H2FS14
+  wave2$H2FS14[wave2$H2FS14 > 3] <- NA
+  
+  # recode H2FS15
+  wave2$FS15[wave2$H2FS15 == 0] <- 3
+  wave2$FS15[wave2$H2FS15 == 1] <- 2
+  wave2$FS15[wave2$H2FS15 == 2] <- 1
+  wave2$FS15[wave2$H2FS15 == 3] <- 0
+  
+  # recode H2FS16
+  wave2$H2FS16[wave2$H2FS16 > 3] <- NA
+  
+  # recode H2FS17
+  wave2$H2FS17[wave2$H2FS17 > 3] <- NA
+  
+  # recode H2FS18
+  wave2$H2FS18[wave2$H2FS18 > 3] <- NA
+  
+  # recode H2FS19
+  wave2$H2FS19[wave2$H2FS19 > 3] <- NA
+  
+  # calculate depressive symptoms
+  wave2$Depression <- apply(wave2[,c("H2FS1", 
+                                     "H2FS2", 
+                                     "H2FS3", 
+                                     "FS4", 
+                                     "H2FS5", 
+                                     "H2FS6", 
+                                     "H2FS7", 
+                                     "FS8", 
+                                     "H2FS9", 
+                                     "H2FS10", 
+                                     "FS11", 
+                                     "H2FS12", 
+                                     "H2FS13", 
+                                     "H2FS14", 
+                                     "FS15", 
+                                     "H2FS16", 
+                                     "H2FS17", 
+                                     "H2FS18", 
+                                     "H2FS19")], 1, sum)
+  
+### Protective Factors, T1
+  # recode H1PR1
+  wave1$H1PR1[wave1$H1PR1 == 6] <- NA
+  wave1$H1PR1[wave1$H1PR1 > 95] <- NA  
+  
+  # recode H1PR2
+  wave1$H1PR2[wave1$H1PR2 == 6] <- NA
+  wave1$H1PR2[wave1$H1PR2 > 95] <- NA  
+  
+  # recode H1PR3
+  wave1$H1PR3[wave1$H1PR3 == 6] <- NA
+  wave1$H1PR3[wave1$H1PR3 > 95] <- NA  
+  
+  # recode H1PR4
+  wave1$H1PR4[wave1$H1PR4 == 6] <- NA
+  wave1$H1PR4[wave1$H1PR4 > 95] <- NA  
+  
+  # recode H1PR5
+  wave1$H1PR5[wave1$H1PR5 == 6] <- NA
+  wave1$H1PR5[wave1$H1PR5 > 95] <- NA  
+  
+  # recode H1PR8
+  wave1$H1PR8[wave1$H1PR8 == 6] <- NA
+  wave1$H1PR8[wave1$H1PR8 > 95] <- NA  
+  
+  # calculate PF
+  wave1$PF <- apply(wave1[,c("H1PR1", 
+                             "H1PR2", 
+                             "H1PR3", 
+                             "H1PR4", 
+                             "H1PR5", 
+                             "H1PR8")], 1, sum)
+```
+
+> Now, let's test the hypothesis.
+
+```{r stats}
+### make new data sets
+  merged <- merge(wave1, wave2, by = 1, all = TRUE)
+
+  # Hypothesis 3
+  H3<- subset(merged, complete.cases(merged[, c("Neighbor", 
+                                                "Depression", 
+                                                "PF")]))
+  
+    # total effect model
+    h3_total_model <- lm(Depression ~ Neighbor, data = H3)
+    summary(h3_total_model)
+    
+    # partial Effect Model
+    h3_partial_model <- lm(Depression ~ Neighbor + PF, data = H3)
+    summary(h3_partial_model)
+```
+
+> The neighborhood environment was found to be a significant longitudinal predictor of mental health. A more positive Wave 1 neighborhood environment predicted lower levels of Wave 2 depressive symptoms (β = -0.56, p < .001), as hypothesized. This effect was not attenuated and remained significant after Wave 1 Protective Factors were included in the model.

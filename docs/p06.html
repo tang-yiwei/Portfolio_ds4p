@@ -266,18 +266,6 @@ $(document).ready(function () {
 <li>
   <a href="p06.html">Portfolio 6</a>
 </li>
-<li>
-  <a href="p07.html">Portfolio 7</a>
-</li>
-<li>
-  <a href="p08.html">Portfolio 8</a>
-</li>
-<li>
-  <a href="p09.html">Portfolio 9</a>
-</li>
-<li>
-  <a href="p10.html">Portfolio 10</a>
-</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         
@@ -296,11 +284,228 @@ $(document).ready(function () {
 
 
 <blockquote>
-<p>The projects should be numbered consecutively (i.e., in the order in
-which you began them), and should include for each project a description
-of the goal, the product (computer program, hand graph, computer graph,
-etc.), the data, and some interpretation. Reports must be reproducible
-and of high quality in terms of writing, grammar, presentation, etc.</p>
+<p>This is the last portion of the Add Health analysis. In this piece, I
+will test a third hypothesis:</p>
+</blockquote>
+<blockquote>
+<p>It is hypothesized that neighborhood environment (Neighborhood, T1)
+will predict lower levels of adolescent depressive symptoms (Feeling
+Scale, T2; total effect). However, this effect will be attenuated after
+support from family and friends (Protective Factors, T1) is controlled
+for (partial effect).</p>
+</blockquote>
+<blockquote>
+<p>First, load the package and data.</p>
+</blockquote>
+<pre class="r"><code>library(haven)
+
+wave1 &lt;- read_spss(&quot;wave1.sav&quot;)
+wave2 &lt;- read_spss(&quot;wave2.sav&quot;)</code></pre>
+<blockquote>
+<p>Next, recode the variables.</p>
+</blockquote>
+<pre class="r"><code>### Neighborhood, T1
+  # recode H1NB6
+  wave1$H1NB6[wave1$H1NB6 &gt;5] &lt;- NA
+  
+  # recode H1NB7
+  wave1$NB[wave1$H1NB7 == 1] &lt;- 5</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: `NB`.</code></pre>
+<pre class="r"><code>  wave1$NB[wave1$H1NB7 == 2] &lt;- 4
+  wave1$NB[wave1$H1NB7 == 4] &lt;- 2
+  wave1$NB[wave1$H1NB7 == 5] &lt;- 1
+  
+  wave1$Neighbor &lt;- apply(wave1[,c(&quot;H1NB6&quot;, 
+                                   &quot;NB&quot;)], 1, sum)
+
+### Feeling Scale, T2
+  # recode H2FS1
+  wave2$H2FS1[wave2$H2FS1 &gt; 3] &lt;- NA
+  
+  # recode H2FS2
+  wave2$H2FS2[wave2$H2FS2 &gt; 3] &lt;- NA
+  
+  # recode H2FS3
+  wave2$H2FS3[wave2$H2FS3 &gt; 3] &lt;- NA
+  
+  # recode H2FS4
+  wave2$FS4[wave2$H2FS4 == 0] &lt;- 3</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: `FS4`.</code></pre>
+<pre class="r"><code>  wave2$FS4[wave2$H2FS4 == 1] &lt;- 2
+  wave2$FS4[wave2$H2FS4 == 2] &lt;- 1
+  wave2$FS4[wave2$H2FS4 == 3] &lt;- 0
+  
+  # recode H2FS5
+  wave2$H2FS5[wave2$H2FS5 &gt; 3] &lt;- NA
+  
+  # recode H2FS6
+  wave2$H2FS6[wave2$H2FS6 &gt; 3] &lt;- NA
+  
+  # recode H2FS7
+  wave2$H2FS7[wave2$H2FS7 &gt; 3] &lt;- NA
+  
+  # recode H2FS8
+  wave2$FS8[wave2$H2FS8 == 0] &lt;- 3</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: `FS8`.</code></pre>
+<pre class="r"><code>  wave2$FS8[wave2$H2FS8 == 1] &lt;- 2
+  wave2$FS8[wave2$H2FS8 == 2] &lt;- 1
+  wave2$FS8[wave2$H2FS8 == 3] &lt;- 0
+  
+  # recode H2FS9
+  wave2$H2FS9[wave2$H2FS9 &gt; 3] &lt;- NA
+  
+  # recode H2FS10
+  wave2$H2FS10[wave2$H2FS10 &gt; 3] &lt;- NA
+  
+  # recode H2FS11
+  wave2$FS11[wave2$H2FS11 == 0] &lt;- 3</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: `FS11`.</code></pre>
+<pre class="r"><code>  wave2$FS11[wave2$H2FS11 == 1] &lt;- 2
+  wave2$FS11[wave2$H2FS11 == 2] &lt;- 1
+  wave2$FS11[wave2$H2FS11 == 3] &lt;- 0
+  
+  # recode H2FS12
+  wave2$H2FS12[wave2$H2FS12 &gt; 3] &lt;- NA
+  
+  # recode H2FS13
+  wave2$H2FS13[wave2$H2FS13 &gt; 3] &lt;- NA
+  
+  # recode H2FS14
+  wave2$H2FS14[wave2$H2FS14 &gt; 3] &lt;- NA
+  
+  # recode H2FS15
+  wave2$FS15[wave2$H2FS15 == 0] &lt;- 3</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: `FS15`.</code></pre>
+<pre class="r"><code>  wave2$FS15[wave2$H2FS15 == 1] &lt;- 2
+  wave2$FS15[wave2$H2FS15 == 2] &lt;- 1
+  wave2$FS15[wave2$H2FS15 == 3] &lt;- 0
+  
+  # recode H2FS16
+  wave2$H2FS16[wave2$H2FS16 &gt; 3] &lt;- NA
+  
+  # recode H2FS17
+  wave2$H2FS17[wave2$H2FS17 &gt; 3] &lt;- NA
+  
+  # recode H2FS18
+  wave2$H2FS18[wave2$H2FS18 &gt; 3] &lt;- NA
+  
+  # recode H2FS19
+  wave2$H2FS19[wave2$H2FS19 &gt; 3] &lt;- NA
+  
+  # calculate depressive symptoms
+  wave2$Depression &lt;- apply(wave2[,c(&quot;H2FS1&quot;, 
+                                     &quot;H2FS2&quot;, 
+                                     &quot;H2FS3&quot;, 
+                                     &quot;FS4&quot;, 
+                                     &quot;H2FS5&quot;, 
+                                     &quot;H2FS6&quot;, 
+                                     &quot;H2FS7&quot;, 
+                                     &quot;FS8&quot;, 
+                                     &quot;H2FS9&quot;, 
+                                     &quot;H2FS10&quot;, 
+                                     &quot;FS11&quot;, 
+                                     &quot;H2FS12&quot;, 
+                                     &quot;H2FS13&quot;, 
+                                     &quot;H2FS14&quot;, 
+                                     &quot;FS15&quot;, 
+                                     &quot;H2FS16&quot;, 
+                                     &quot;H2FS17&quot;, 
+                                     &quot;H2FS18&quot;, 
+                                     &quot;H2FS19&quot;)], 1, sum)
+  
+### Protective Factors, T1
+  # recode H1PR1
+  wave1$H1PR1[wave1$H1PR1 == 6] &lt;- NA
+  wave1$H1PR1[wave1$H1PR1 &gt; 95] &lt;- NA  
+  
+  # recode H1PR2
+  wave1$H1PR2[wave1$H1PR2 == 6] &lt;- NA
+  wave1$H1PR2[wave1$H1PR2 &gt; 95] &lt;- NA  
+  
+  # recode H1PR3
+  wave1$H1PR3[wave1$H1PR3 == 6] &lt;- NA
+  wave1$H1PR3[wave1$H1PR3 &gt; 95] &lt;- NA  
+  
+  # recode H1PR4
+  wave1$H1PR4[wave1$H1PR4 == 6] &lt;- NA
+  wave1$H1PR4[wave1$H1PR4 &gt; 95] &lt;- NA  
+  
+  # recode H1PR5
+  wave1$H1PR5[wave1$H1PR5 == 6] &lt;- NA
+  wave1$H1PR5[wave1$H1PR5 &gt; 95] &lt;- NA  
+  
+  # recode H1PR8
+  wave1$H1PR8[wave1$H1PR8 == 6] &lt;- NA
+  wave1$H1PR8[wave1$H1PR8 &gt; 95] &lt;- NA  
+  
+  # calculate PF
+  wave1$PF &lt;- apply(wave1[,c(&quot;H1PR1&quot;, 
+                             &quot;H1PR2&quot;, 
+                             &quot;H1PR3&quot;, 
+                             &quot;H1PR4&quot;, 
+                             &quot;H1PR5&quot;, 
+                             &quot;H1PR8&quot;)], 1, sum)</code></pre>
+<blockquote>
+<p>Now, let’s test the hypothesis.</p>
+</blockquote>
+<pre class="r"><code>### make new data sets
+  merged &lt;- merge(wave1, wave2, by = 1, all = TRUE)
+
+  # Hypothesis 3
+  H3&lt;- subset(merged, complete.cases(merged[, c(&quot;Neighbor&quot;, 
+                                                &quot;Depression&quot;, 
+                                                &quot;PF&quot;)]))
+  
+    # total effect model
+    h3_total_model &lt;- lm(Depression ~ Neighbor, data = H3)
+    summary(h3_total_model)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = Depression ~ Neighbor, data = H3)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -13.944  -5.493  -1.275   3.838  45.951 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 15.05730    0.48654  30.948   &lt;2e-16 ***
+## Neighbor    -0.55644    0.06025  -9.236   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 7.452 on 3432 degrees of freedom
+## Multiple R-squared:  0.02425,    Adjusted R-squared:  0.02397 
+## F-statistic:  85.3 on 1 and 3432 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>    # partial Effect Model
+    h3_partial_model &lt;- lm(Depression ~ Neighbor + PF, data = H3)
+    summary(h3_partial_model)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = Depression ~ Neighbor + PF, data = H3)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -16.764  -5.061  -1.320   3.702  42.010 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 28.31786    0.91149  31.068  &lt; 2e-16 ***
+## Neighbor    -0.26288    0.06042  -4.351 1.39e-05 ***
+## PF          -0.62957    0.03715 -16.946  &lt; 2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 7.159 on 3431 degrees of freedom
+## Multiple R-squared:  0.09962,    Adjusted R-squared:  0.09909 
+## F-statistic: 189.8 on 2 and 3431 DF,  p-value: &lt; 2.2e-16</code></pre>
+<blockquote>
+<p>The neighborhood environment was found to be a significant
+longitudinal predictor of mental health. A more positive Wave 1
+neighborhood environment predicted lower levels of Wave 2 depressive
+symptoms (β = -0.56, p &lt; .001), as hypothesized. This effect was not
+attenuated and remained significant after Wave 1 Protective Factors were
+included in the model.</p>
 </blockquote>
 
 

@@ -6,7 +6,7 @@ title: "Portfolio 4"
 
 > It is hypothesized that young adolescents’ sexual risk-taking (Motivations to Engage in Risky Behaviors, T1) will be associated with higher levels of substance use (Tobacco, Alcohol, Drugs, T1; total effect). Additionally, this effect will persist after controlling for (Parents’ Attitudes, T1; partial effect). However, the relationship between sexual risk-taking and substance use will be stronger among boys than girls (T1; moderated effect).
 
-> First, load the packages and data.
+> First, load the package and data.
 
 ```{r load_package&data}
 library(haven)
@@ -170,7 +170,7 @@ wave1 <- read_spss("wave1.sav")
 
 > Now I have the appropriate variables, let's build models to test the hypothesis.
 
-```{r}
+```{r stats}
 # Hypothesis 1
   H1 <- subset(wave1, complete.cases(wave1[, c("Motivation", 
                                                  "Drug1", 

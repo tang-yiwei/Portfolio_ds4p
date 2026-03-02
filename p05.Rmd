@@ -2,4 +2,68 @@
 title: "Portfolio 5"
 ---
 
-> The projects should be numbered consecutively (i.e., in the order in which you began them), and should include for each project a description of the goal, the product (computer program, hand graph, computer graph, etc.), the data, and some interpretation. Reports must be reproducible and of high quality in terms of writing, grammar, presentation, etc.
+> Adding to portfolio piece 4, this piece tests another hypothesis with the Add Health dataset:
+
+>It is hypothesized that young adolescents who are more engaged in fighting and violence (Fighting and Violence, T1) will engage in more substance use the subsequent year (Tobacco, Alcohol, Drugs, T2; total effect). It is further hypothesized that this association will persist even after controlling for substance use at the previous time point (T1; partial effect).
+
+> First, let's load the package and data.
+
+```{r load_package&data}
+library(haven)
+
+wave1 <- read_spss("wave1.sav")
+wave2 <- read_spss("wave2.sav")
+```
+
+> Next, let's recoed the variables.
+
+```{r recode}
+### Tobacco, Alcohol, Drugs, T1
+  wave1$Drug1 <- wave1$H1TO7
+  wave1$Drug1[wave1$H1TO7 >95] <- NA
+  
+### Fighting and Violence, T1
+  # recode H1FV1
+  wave1$H1FV1[wave1$H1FV1 >5] <- NA
+  
+  # recode H1FV5
+  wave1$H1FV5[wave1$H1FV5 >5] <- NA
+  
+  # recode H1FV7
+  wave1$H1FV7[wave1$H1FV7 >5] <- NA
+  
+  # recode H1FV8
+  wave1$H1FV8[wave1$H1FV8 >5] <- NA
+
+  # calculate fighting
+  wave1$Fight <- apply(wave1[,c("H1FV1", 
+                                "H1FV5", 
+                                "H1FV7", 
+                                "H1FV8")], 1, sum)
+  
+### Tobacco, Alcohol, Drugs, T2
+  wave2$Drug2 <- wave2$H2TO7
+  wave2$Drug2[wave2$H2TO7 > 95] <- NA
+```
+
+> Now, let's test the hypothesis.
+
+```{r stats}
+### make new data sets
+  merged <- merge(wave1, wave2, by = 1, all = TRUE)
+
+ # Hypothesis 2
+  H2<- subset(merged, complete.cases(merged[, c("Fight", 
+                                                "Drug1", 
+                                                "Drug2")]))
+  
+    # total effect model
+    h2_total_model <- lm(Drug2 ~ Fight, data = H2)
+    summary(h2_total_model)
+    
+    # partial effect model
+    h2_partial_model <- lm(Drug2 ~ Fight + Drug1, data = H2)
+    summary(h2_partial_model)
+```
+
+> The result showed a longitudinal relationship between aggression and substance use. Adolescents who engaged in more fighting at Wave 1 were more likely to use substances at Wave 2. This powerful association remained significant even after controlling for their prior levels of substance use at Wave 1, supporting the partial effect hypothesis (β = 0.49, p = .003). This suggests that fighting predicts an increase in substance use over time, independent of initial substance use levels. 

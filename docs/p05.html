@@ -266,18 +266,6 @@ $(document).ready(function () {
 <li>
   <a href="p06.html">Portfolio 6</a>
 </li>
-<li>
-  <a href="p07.html">Portfolio 7</a>
-</li>
-<li>
-  <a href="p08.html">Portfolio 8</a>
-</li>
-<li>
-  <a href="p09.html">Portfolio 9</a>
-</li>
-<li>
-  <a href="p10.html">Portfolio 10</a>
-</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         
@@ -296,11 +284,116 @@ $(document).ready(function () {
 
 
 <blockquote>
-<p>The projects should be numbered consecutively (i.e., in the order in
-which you began them), and should include for each project a description
-of the goal, the product (computer program, hand graph, computer graph,
-etc.), the data, and some interpretation. Reports must be reproducible
-and of high quality in terms of writing, grammar, presentation, etc.</p>
+<p>Adding to portfolio piece 4, this piece tests another hypothesis with
+the Add Health dataset.</p>
+</blockquote>
+<blockquote>
+<p>It is hypothesized that young adolescents who are more engaged in
+fighting and violence (Fighting and Violence, T1) will engage in more
+substance use the subsequent year (Tobacco, Alcohol, Drugs, T2; total
+effect). It is further hypothesized that this association will persist
+even after controlling for substance use at the previous time point (T1;
+partial effect).</p>
+</blockquote>
+<blockquote>
+<p>First, let’s load the package and data.</p>
+</blockquote>
+<pre class="r"><code>library(haven)
+
+wave1 &lt;- read_spss(&quot;wave1.sav&quot;)
+wave2 &lt;- read_spss(&quot;wave2.sav&quot;)</code></pre>
+<blockquote>
+<p>Next, let’s recoed the variables.</p>
+</blockquote>
+<pre class="r"><code>### Tobacco, Alcohol, Drugs, T1
+  wave1$Drug1 &lt;- wave1$H1TO7
+  wave1$Drug1[wave1$H1TO7 &gt;95] &lt;- NA
+  
+### Fighting and Violence, T1
+  # recode H1FV1
+  wave1$H1FV1[wave1$H1FV1 &gt;5] &lt;- NA
+  
+  # recode H1FV5
+  wave1$H1FV5[wave1$H1FV5 &gt;5] &lt;- NA
+  
+  # recode H1FV7
+  wave1$H1FV7[wave1$H1FV7 &gt;5] &lt;- NA
+  
+  # recode H1FV8
+  wave1$H1FV8[wave1$H1FV8 &gt;5] &lt;- NA
+
+  # calculate fighting
+  wave1$Fight &lt;- apply(wave1[,c(&quot;H1FV1&quot;, 
+                                &quot;H1FV5&quot;, 
+                                &quot;H1FV7&quot;, 
+                                &quot;H1FV8&quot;)], 1, sum)
+  
+### Tobacco, Alcohol, Drugs, T2
+  wave2$Drug2 &lt;- wave2$H2TO7
+  wave2$Drug2[wave2$H2TO7 &gt; 95] &lt;- NA</code></pre>
+<blockquote>
+<p>Now, let’s test the hypothesis.</p>
+</blockquote>
+<pre class="r"><code>### make new data sets
+  merged &lt;- merge(wave1, wave2, by = 1, all = TRUE)
+
+ # Hypothesis 2
+  H2&lt;- subset(merged, complete.cases(merged[, c(&quot;Fight&quot;, 
+                                                &quot;Drug1&quot;, 
+                                                &quot;Drug2&quot;)]))
+  
+    # total effect model
+    h2_total_model &lt;- lm(Drug2 ~ Fight, data = H2)
+    summary(h2_total_model)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = Drug2 ~ Fight, data = H2)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -13.456  -6.660  -2.832   5.512  52.168 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)   7.8323     0.3421  22.898  &lt; 2e-16 ***
+## Fight         0.8279     0.1873   4.421  1.1e-05 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 8.451 on 886 degrees of freedom
+## Multiple R-squared:  0.02159,    Adjusted R-squared:  0.02048 
+## F-statistic: 19.55 on 1 and 886 DF,  p-value: 1.103e-05</code></pre>
+<pre class="r"><code>    # partial effect model
+    h2_partial_model &lt;- lm(Drug2 ~ Fight + Drug1, data = H2)
+    summary(h2_partial_model)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = Drug2 ~ Fight + Drug1, data = H2)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -35.451  -3.998  -2.076   3.128  53.491 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  4.46398    0.34947  12.774  &lt; 2e-16 ***
+## Fight        0.48730    0.16194   3.009  0.00269 ** 
+## Drug1        0.51123    0.02874  17.790  &lt; 2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 7.257 on 885 degrees of freedom
+## Multiple R-squared:  0.2793, Adjusted R-squared:  0.2777 
+## F-statistic: 171.5 on 2 and 885 DF,  p-value: &lt; 2.2e-16</code></pre>
+<blockquote>
+<p>The result showed a longitudinal relationship between aggression and
+substance use. Adolescents who engaged in more fighting at Wave 1 were
+more likely to use substances at Wave 2. This powerful association
+remained significant even after controlling for their prior levels of
+substance use at Wave 1, supporting the partial effect hypothesis (β =
+0.49, p = .003). This suggests that fighting predicts an increase in
+substance use over time, independent of initial substance use
+levels.</p>
 </blockquote>
 
 
