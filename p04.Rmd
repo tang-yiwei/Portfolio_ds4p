@@ -2,4 +2,192 @@
 title: "Portfolio 4"
 ---
 
-> The projects should be numbered consecutively (i.e., in the order in which you began them), and should include for each project a description of the goal, the product (computer program, hand graph, computer graph, etc.), the data, and some interpretation. Reports must be reproducible and of high quality in terms of writing, grammar, presentation, etc.
+> In this project, I use the Waves 1 and 2 of the National Longitudinal Study of Adolescent to Adult Health (Add Health) to test the following hypothesis:
+
+> It is hypothesized that young adolescents’ sexual risk-taking (Motivations to Engage in Risky Behaviors, T1) will be associated with higher levels of substance use (Tobacco, Alcohol, Drugs, T1; total effect). Additionally, this effect will persist after controlling for (Parents’ Attitudes, T1; partial effect). However, the relationship between sexual risk-taking and substance use will be stronger among boys than girls (T1; moderated effect).
+
+> First, load the packages and data.
+
+```{r load_package&data}
+library(haven)
+
+wave1 <- read_spss("wave1.sav")
+```
+
+> Next, I'll recode the variables needed for the testing of the hypothesis.
+
+```{r recode}
+### Motivation T1
+  # recode H1MO1
+  wave1$mot1[wave1$H1MO1 == 1] <- 2
+  wave1$mot1[wave1$H1MO1 == 2] <- 1
+  wave1$mot1[wave1$H1MO1 == 3] <- 0
+  wave1$mot1[wave1$H1MO1 == 4] <- -1
+  wave1$mot1[wave1$H1MO1 == 5] <- -2
+  
+  # recode H1MO2
+  wave1$mot2[wave1$H1MO2 == 1] <- -2
+  wave1$mot2[wave1$H1MO2 == 2] <- -1
+  wave1$mot2[wave1$H1MO2 == 3] <- 0
+  wave1$mot2[wave1$H1MO2 == 4] <- 1
+  wave1$mot2[wave1$H1MO2 == 5] <- 2
+  
+  # recode H1MO3
+  wave1$mot3[wave1$H1MO3 == 1] <- -2
+  wave1$mot3[wave1$H1MO3 == 2] <- -1
+  wave1$mot3[wave1$H1MO3 == 3] <- 0
+  wave1$mot3[wave1$H1MO3 == 4] <- 1
+  wave1$mot3[wave1$H1MO3 == 5] <- 2
+  
+  # recode H1MO5
+  wave1$mot5[wave1$H1MO5 == 1] <- 2
+  wave1$mot5[wave1$H1MO5 == 2] <- 1
+  wave1$mot5[wave1$H1MO5 == 3] <- 0
+  wave1$mot5[wave1$H1MO5 == 4] <- -1
+  wave1$mot5[wave1$H1MO5 == 5] <- -2
+
+  # recode H1MO6
+  wave1$mot6[wave1$H1MO6 == 1] <- 2
+  wave1$mot6[wave1$H1MO6 == 2] <- 1
+  wave1$mot6[wave1$H1MO6 == 3] <- 0
+  wave1$mot6[wave1$H1MO6 == 4] <- -1
+  wave1$mot6[wave1$H1MO6 == 5] <- -2
+  
+  # recode H1MO7
+  wave1$mot7[wave1$H1MO7 == 1] <- 2
+  wave1$mot7[wave1$H1MO7 == 2] <- 1
+  wave1$mot7[wave1$H1MO7 == 3] <- 0
+  wave1$mot7[wave1$H1MO7 == 4] <- -1
+  wave1$mot7[wave1$H1MO7 == 5] <- -2
+
+  # recode H1MO8
+  wave1$mot8[wave1$H1MO8 == 1] <- 2
+  wave1$mot8[wave1$H1MO8 == 2] <- 1
+  wave1$mot8[wave1$H1MO8 == 3] <- 0
+  wave1$mot8[wave1$H1MO8 == 4] <- -1
+  wave1$mot8[wave1$H1MO8 == 5] <- -2
+
+  # calculate overall motivation
+  wave1$Motivation <- apply(wave1[,c("mot1",
+                                         "mot2", 
+                                         "mot3", 
+                                         "mot5",
+                                         "mot6",
+                                         "mot7", 
+                                         "mot8")], 1, mean)
+
+### Tobacco, Alcohol, Drugs, T1
+  wave1$Drug1 <- wave1$H1TO7
+  wave1$Drug1[wave1$H1TO7 >95] <- NA
+  
+### Parents’ Attitudes, T1
+  wave1$Mom <- 1
+  wave1$Dad <- 1
+  
+  for(i in 1:nrow(wave1)){
+    if(wave1$H1PA1[i] == 7) {
+      wave1$Mom[i] <- 0
+    }
+    
+    if(wave1$H1PA4[i] == 7) {
+      wave1$Dad[i] <- 0
+    }
+  }
+  
+  # recode H1PA1
+  wave1$par1[wave1$H1PA1 == 1] <- -2
+  wave1$par1[wave1$H1PA1 == 2] <- -1
+  wave1$par1[wave1$H1PA1 == 3] <- 0
+  wave1$par1[wave1$H1PA1 == 4] <- 1
+  wave1$par1[wave1$H1PA1 == 5] <- 2
+  
+  # recode H1PA2
+  wave1$par2[wave1$H1PA2 == 1] <- -2
+  wave1$par2[wave1$H1PA2 == 2] <- -1
+  wave1$par2[wave1$H1PA2 == 3] <- 0
+  wave1$par2[wave1$H1PA2 == 4] <- 1
+  wave1$par2[wave1$H1PA2 == 5] <- 2
+
+  # recode H1PA3
+  wave1$par3[wave1$H1PA3 == 1] <- -2
+  wave1$par3[wave1$H1PA3 == 2] <- -1
+  wave1$par3[wave1$H1PA3 == 3] <- 0
+  wave1$par3[wave1$H1PA3 == 4] <- 1
+  wave1$par3[wave1$H1PA3 == 5] <- 2
+
+  # recode H1PA4
+  wave1$par4[wave1$H1PA4 == 1] <- -2
+  wave1$par4[wave1$H1PA4 == 2] <- -1
+  wave1$par4[wave1$H1PA4 == 3] <- 0
+  wave1$par4[wave1$H1PA4 == 4] <- 1
+  wave1$par4[wave1$H1PA4 == 5] <- 2
+  
+  # recode H1PA5
+  wave1$par5[wave1$H1PA5 == 1] <- -2
+  wave1$par5[wave1$H1PA5 == 2] <- -1
+  wave1$par5[wave1$H1PA5 == 3] <- 0
+  wave1$par5[wave1$H1PA5 == 4] <- 1
+  wave1$par5[wave1$H1PA5 == 5] <- 2
+  
+  # recode H1PA6
+  wave1$par6[wave1$H1PA6 == 1] <- -2
+  wave1$par6[wave1$H1PA6 == 2] <- -1
+  wave1$par6[wave1$H1PA6 == 3] <- 0
+  wave1$par6[wave1$H1PA6 == 4] <- 1
+  wave1$par6[wave1$H1PA6 == 5] <- 2
+  
+  for(i in 1:nrow(wave1)){
+    if(wave1$Mom[i] == 0){
+      if(wave1$Dad[i] == 0){
+        wave1$pAttitude[i] <- NA
+      }
+      else{
+        wave1$pAttitude[i] <- apply(wave1[i,c("par4", 
+                                             "par5", 
+                                             "par6")], 1, mean)
+      }
+    }
+    else{
+      if(wave1$Dad[i] == 0){
+        wave1$pAttitude[i] <- apply(wave1[i,c("par1", 
+                                             "par2", 
+                                             "par3")], 1, mean)
+      }
+      else{
+        wave1$pAttitude[i] <- apply(wave1[i,c("par1", 
+                                             "par2", 
+                                             "par3", 
+                                             "par4", 
+                                             "par5", 
+                                             "par6")], 1, mean)
+      }
+    }
+  }
+  
+### Gender, T1 (male = 1; female = 2)
+  wave1$BIO_SEX[wave1$BIO_SEX == 6] <- NA
+```
+
+> Now I have the appropriate variables, let's build models to test the hypothesis.
+
+```{r}
+# Hypothesis 1
+  H1 <- subset(wave1, complete.cases(wave1[, c("Motivation", 
+                                                 "Drug1", 
+                                                 "pAttitude", 
+                                                 "BIO_SEX")]))
+  
+    # total effect model
+    h1_total_model <- lm(Drug1 ~ Motivation, data = H1)
+    summary(h1_total_model)
+    
+    # partial effect model
+    h1_partial_model <- lm(Drug1 ~ Motivation + pAttitude, data = H1)
+    summary(h1_partial_model)
+    
+    # moderated effect model
+    h1_moderated_model <- lm(Drug1 ~ Motivation * BIO_SEX + pAttitude, data = H1)
+    summary(h1_moderated_model)
+```
+
+> The result shows that motivation for risky behaviors was positively associated with substance use. This effect persisted even after accounting for parents’ attitudes. However, the moderation hypothesis was not supported; the data indicated that the relationship between motivation and substance use did not significantly differ between boys and girls. 

@@ -266,18 +266,6 @@ $(document).ready(function () {
 <li>
   <a href="p06.html">Portfolio 6</a>
 </li>
-<li>
-  <a href="p07.html">Portfolio 7</a>
-</li>
-<li>
-  <a href="p08.html">Portfolio 8</a>
-</li>
-<li>
-  <a href="p09.html">Portfolio 9</a>
-</li>
-<li>
-  <a href="p10.html">Portfolio 10</a>
-</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         
@@ -296,11 +284,275 @@ $(document).ready(function () {
 
 
 <blockquote>
-<p>The projects should be numbered consecutively (i.e., in the order in
-which you began them), and should include for each project a description
-of the goal, the product (computer program, hand graph, computer graph,
-etc.), the data, and some interpretation. Reports must be reproducible
-and of high quality in terms of writing, grammar, presentation, etc.</p>
+<p>In this project, I use the Waves 1 and 2 of the National Longitudinal
+Study of Adolescent to Adult Health (Add Health) to test the following
+hypothesis:</p>
+</blockquote>
+<blockquote>
+<p>It is hypothesized that young adolescents’ sexual risk-taking
+(Motivations to Engage in Risky Behaviors, T1) will be associated with
+higher levels of substance use (Tobacco, Alcohol, Drugs, T1; total
+effect). Additionally, this effect will persist after controlling for
+(Parents’ Attitudes, T1; partial effect). However, the relationship
+between sexual risk-taking and substance use will be stronger among boys
+than girls (T1; moderated effect).</p>
+</blockquote>
+<blockquote>
+<p>First, load the packages and data.</p>
+</blockquote>
+<pre class="r"><code>library(haven)
+
+wave1 &lt;- read_spss(&quot;wave1.sav&quot;)</code></pre>
+<blockquote>
+<p>Next, I’ll recode the variables needed for the testing of the
+hypothesis.</p>
+</blockquote>
+<pre class="r"><code>### Motivation T1
+  # recode H1MO1
+  wave1$mot1[wave1$H1MO1 == 1] &lt;- 2</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: `mot1`.</code></pre>
+<pre class="r"><code>  wave1$mot1[wave1$H1MO1 == 2] &lt;- 1
+  wave1$mot1[wave1$H1MO1 == 3] &lt;- 0
+  wave1$mot1[wave1$H1MO1 == 4] &lt;- -1
+  wave1$mot1[wave1$H1MO1 == 5] &lt;- -2
+  
+  # recode H1MO2
+  wave1$mot2[wave1$H1MO2 == 1] &lt;- -2</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: `mot2`.</code></pre>
+<pre class="r"><code>  wave1$mot2[wave1$H1MO2 == 2] &lt;- -1
+  wave1$mot2[wave1$H1MO2 == 3] &lt;- 0
+  wave1$mot2[wave1$H1MO2 == 4] &lt;- 1
+  wave1$mot2[wave1$H1MO2 == 5] &lt;- 2
+  
+  # recode H1MO3
+  wave1$mot3[wave1$H1MO3 == 1] &lt;- -2</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: `mot3`.</code></pre>
+<pre class="r"><code>  wave1$mot3[wave1$H1MO3 == 2] &lt;- -1
+  wave1$mot3[wave1$H1MO3 == 3] &lt;- 0
+  wave1$mot3[wave1$H1MO3 == 4] &lt;- 1
+  wave1$mot3[wave1$H1MO3 == 5] &lt;- 2
+  
+  # recode H1MO5
+  wave1$mot5[wave1$H1MO5 == 1] &lt;- 2</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: `mot5`.</code></pre>
+<pre class="r"><code>  wave1$mot5[wave1$H1MO5 == 2] &lt;- 1
+  wave1$mot5[wave1$H1MO5 == 3] &lt;- 0
+  wave1$mot5[wave1$H1MO5 == 4] &lt;- -1
+  wave1$mot5[wave1$H1MO5 == 5] &lt;- -2
+
+  # recode H1MO6
+  wave1$mot6[wave1$H1MO6 == 1] &lt;- 2</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: `mot6`.</code></pre>
+<pre class="r"><code>  wave1$mot6[wave1$H1MO6 == 2] &lt;- 1
+  wave1$mot6[wave1$H1MO6 == 3] &lt;- 0
+  wave1$mot6[wave1$H1MO6 == 4] &lt;- -1
+  wave1$mot6[wave1$H1MO6 == 5] &lt;- -2
+  
+  # recode H1MO7
+  wave1$mot7[wave1$H1MO7 == 1] &lt;- 2</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: `mot7`.</code></pre>
+<pre class="r"><code>  wave1$mot7[wave1$H1MO7 == 2] &lt;- 1
+  wave1$mot7[wave1$H1MO7 == 3] &lt;- 0
+  wave1$mot7[wave1$H1MO7 == 4] &lt;- -1
+  wave1$mot7[wave1$H1MO7 == 5] &lt;- -2
+
+  # recode H1MO8
+  wave1$mot8[wave1$H1MO8 == 1] &lt;- 2</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: `mot8`.</code></pre>
+<pre class="r"><code>  wave1$mot8[wave1$H1MO8 == 2] &lt;- 1
+  wave1$mot8[wave1$H1MO8 == 3] &lt;- 0
+  wave1$mot8[wave1$H1MO8 == 4] &lt;- -1
+  wave1$mot8[wave1$H1MO8 == 5] &lt;- -2
+
+  # calculate overall motivation
+  wave1$Motivation &lt;- apply(wave1[,c(&quot;mot1&quot;,
+                                         &quot;mot2&quot;, 
+                                         &quot;mot3&quot;, 
+                                         &quot;mot5&quot;,
+                                         &quot;mot6&quot;,
+                                         &quot;mot7&quot;, 
+                                         &quot;mot8&quot;)], 1, mean)
+
+### Tobacco, Alcohol, Drugs, T1
+  wave1$Drug1 &lt;- wave1$H1TO7
+  wave1$Drug1[wave1$H1TO7 &gt;95] &lt;- NA
+  
+### Parents’ Attitudes, T1
+  wave1$Mom &lt;- 1
+  wave1$Dad &lt;- 1
+  
+  for(i in 1:nrow(wave1)){
+    if(wave1$H1PA1[i] == 7) {
+      wave1$Mom[i] &lt;- 0
+    }
+    
+    if(wave1$H1PA4[i] == 7) {
+      wave1$Dad[i] &lt;- 0
+    }
+  }
+  
+  # recode H1PA1
+  wave1$par1[wave1$H1PA1 == 1] &lt;- -2</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: `par1`.</code></pre>
+<pre class="r"><code>  wave1$par1[wave1$H1PA1 == 2] &lt;- -1
+  wave1$par1[wave1$H1PA1 == 3] &lt;- 0
+  wave1$par1[wave1$H1PA1 == 4] &lt;- 1
+  wave1$par1[wave1$H1PA1 == 5] &lt;- 2
+  
+  # recode H1PA2
+  wave1$par2[wave1$H1PA2 == 1] &lt;- -2</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: `par2`.</code></pre>
+<pre class="r"><code>  wave1$par2[wave1$H1PA2 == 2] &lt;- -1
+  wave1$par2[wave1$H1PA2 == 3] &lt;- 0
+  wave1$par2[wave1$H1PA2 == 4] &lt;- 1
+  wave1$par2[wave1$H1PA2 == 5] &lt;- 2
+
+  # recode H1PA3
+  wave1$par3[wave1$H1PA3 == 1] &lt;- -2</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: `par3`.</code></pre>
+<pre class="r"><code>  wave1$par3[wave1$H1PA3 == 2] &lt;- -1
+  wave1$par3[wave1$H1PA3 == 3] &lt;- 0
+  wave1$par3[wave1$H1PA3 == 4] &lt;- 1
+  wave1$par3[wave1$H1PA3 == 5] &lt;- 2
+
+  # recode H1PA4
+  wave1$par4[wave1$H1PA4 == 1] &lt;- -2</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: `par4`.</code></pre>
+<pre class="r"><code>  wave1$par4[wave1$H1PA4 == 2] &lt;- -1
+  wave1$par4[wave1$H1PA4 == 3] &lt;- 0
+  wave1$par4[wave1$H1PA4 == 4] &lt;- 1
+  wave1$par4[wave1$H1PA4 == 5] &lt;- 2
+  
+  # recode H1PA5
+  wave1$par5[wave1$H1PA5 == 1] &lt;- -2</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: `par5`.</code></pre>
+<pre class="r"><code>  wave1$par5[wave1$H1PA5 == 2] &lt;- -1
+  wave1$par5[wave1$H1PA5 == 3] &lt;- 0
+  wave1$par5[wave1$H1PA5 == 4] &lt;- 1
+  wave1$par5[wave1$H1PA5 == 5] &lt;- 2
+  
+  # recode H1PA6
+  wave1$par6[wave1$H1PA6 == 1] &lt;- -2</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: `par6`.</code></pre>
+<pre class="r"><code>  wave1$par6[wave1$H1PA6 == 2] &lt;- -1
+  wave1$par6[wave1$H1PA6 == 3] &lt;- 0
+  wave1$par6[wave1$H1PA6 == 4] &lt;- 1
+  wave1$par6[wave1$H1PA6 == 5] &lt;- 2
+  
+  for(i in 1:nrow(wave1)){
+    if(wave1$Mom[i] == 0){
+      if(wave1$Dad[i] == 0){
+        wave1$pAttitude[i] &lt;- NA
+      }
+      else{
+        wave1$pAttitude[i] &lt;- apply(wave1[i,c(&quot;par4&quot;, 
+                                             &quot;par5&quot;, 
+                                             &quot;par6&quot;)], 1, mean)
+      }
+    }
+    else{
+      if(wave1$Dad[i] == 0){
+        wave1$pAttitude[i] &lt;- apply(wave1[i,c(&quot;par1&quot;, 
+                                             &quot;par2&quot;, 
+                                             &quot;par3&quot;)], 1, mean)
+      }
+      else{
+        wave1$pAttitude[i] &lt;- apply(wave1[i,c(&quot;par1&quot;, 
+                                             &quot;par2&quot;, 
+                                             &quot;par3&quot;, 
+                                             &quot;par4&quot;, 
+                                             &quot;par5&quot;, 
+                                             &quot;par6&quot;)], 1, mean)
+      }
+    }
+  }</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: `pAttitude`.</code></pre>
+<pre class="r"><code>### Gender, T1 (male = 1; female = 2)
+  wave1$BIO_SEX[wave1$BIO_SEX == 6] &lt;- NA</code></pre>
+<blockquote>
+<p>Now I have the appropriate variables, let’s build models to test the
+hypothesis.</p>
+</blockquote>
+<pre class="r"><code># Hypothesis 1
+  H1 &lt;- subset(wave1, complete.cases(wave1[, c(&quot;Motivation&quot;, 
+                                                 &quot;Drug1&quot;, 
+                                                 &quot;pAttitude&quot;, 
+                                                 &quot;BIO_SEX&quot;)]))
+  
+    # total effect model
+    h1_total_model &lt;- lm(Drug1 ~ Motivation, data = H1)
+    summary(h1_total_model)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = Drug1 ~ Motivation, data = H1)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -8.265 -5.246 -3.024  2.976 82.587 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)   7.0238     0.2451  28.657  &lt; 2e-16 ***
+## Motivation    1.4263     0.4374   3.261  0.00114 ** 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 8.276 on 1155 degrees of freedom
+## Multiple R-squared:  0.009125,   Adjusted R-squared:  0.008267 
+## F-statistic: 10.64 on 1 and 1155 DF,  p-value: 0.001142</code></pre>
+<pre class="r"><code>    # partial effect model
+    h1_partial_model &lt;- lm(Drug1 ~ Motivation + pAttitude, data = H1)
+    summary(h1_partial_model)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = Drug1 ~ Motivation + pAttitude, data = H1)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -9.136 -5.227 -2.958  2.934 83.257 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)   7.3693     0.2673  27.571  &lt; 2e-16 ***
+## Motivation    1.0201     0.4540   2.247  0.02484 *  
+## pAttitude     0.8922     0.2809   3.176  0.00153 ** 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 8.244 on 1154 degrees of freedom
+## Multiple R-squared:  0.01771,    Adjusted R-squared:  0.01601 
+## F-statistic:  10.4 on 2 and 1154 DF,  p-value: 3.327e-05</code></pre>
+<pre class="r"><code>    # moderated effect model
+    h1_moderated_model &lt;- lm(Drug1 ~ Motivation * BIO_SEX + pAttitude, data = H1)
+    summary(h1_moderated_model)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = Drug1 ~ Motivation * BIO_SEX + pAttitude, data = H1)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -9.491 -5.273 -2.885  2.984 82.377 
+## 
+## Coefficients:
+##                    Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)          8.8160     0.8930   9.872  &lt; 2e-16 ***
+## Motivation          -0.2679     1.5640  -0.171  0.86402    
+## BIO_SEX             -0.9111     0.5508  -1.654  0.09837 .  
+## pAttitude            0.8448     0.2822   2.994  0.00282 ** 
+## Motivation:BIO_SEX   0.6307     0.9780   0.645  0.51916    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 8.241 on 1152 degrees of freedom
+## Multiple R-squared:  0.02019,    Adjusted R-squared:  0.01679 
+## F-statistic: 5.936 on 4 and 1152 DF,  p-value: 9.962e-05</code></pre>
+<blockquote>
+<p>The result shows that motivation for risky behaviors was positively
+associated with substance use. This effect persisted even after
+accounting for parents’ attitudes. However, the moderation hypothesis
+was not supported; the data indicated that the relationship between
+motivation and substance use did not significantly differ between boys
+and girls.</p>
 </blockquote>
 
 
